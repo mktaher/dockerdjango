@@ -16,7 +16,7 @@ class Article(DetailView):
 class AddPost(LoginRequiredMixin, CreateView):
     model = Post
     template_name = 'addpost.html'
-    fields = ['title', 'body']  # Exclude the 'author' field from the form
+    fields = ['title', 'body']  
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.username != '2027mtaher':
@@ -24,6 +24,5 @@ class AddPost(LoginRequiredMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # Automatically set the logged-in user as the author of the post
         form.instance.author = self.request.user
         return super().form_valid(form)

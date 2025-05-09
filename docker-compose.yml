@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: /venv/bin/python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - blog-network
+
+  celery:
+    build: .
+    command: /venv/bin/celery -A django_blog worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - blog-network
+
+  celerybeat:
+    build: .
+    command: /venv/bin/celery -A django_blog beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - celery
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - blog-network
+
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    networks:
+      - blog-network
+
+volumes:
+  app_data:
+
+networks:
+  blog-network:
+    driver: bridge
